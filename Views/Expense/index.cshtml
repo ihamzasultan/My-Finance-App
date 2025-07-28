@@ -1,0 +1,46 @@
+@model IEnumerable<FinanceApp.Models.Expense>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h2 class="mb-4 text-center fw-bold text-primary">💰 My Expenses</h2>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle text-center table-striped">
+                            <thead class="table-primary sticky-top">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Id</td>
+                                        <td class="text-center">@item.Category</td>
+                                        <td class="text-center">@item.Description</td>
+                                        <td class="fw-semibold text-primary">Rs. @item.Amount.ToString("N0")</td>
+                                        <td>@item.Date</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (!Model.Any())
+                    {
+                        <div class="alert alert-warning mt-4 text-center">
+                            No expenses found. Start adding some!
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
