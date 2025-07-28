@@ -44,3 +44,176 @@
         </div>
     </div>
 </div>
+
+
+@*Solid Chart.js integration*@ 
+
+@* <h2>Expenses Overview</h2>
+
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  fetch('/Expense/getChart')
+    .then(response => response.json())
+    .then(data => {
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: data.map(item => item.category),
+          datasets: [{
+            data: data.map(item => item.totalAmount),
+          }]
+        },
+        
+      });
+    });
+</script> *@
+
+@*Chartgpt written design*@
+<h2 class="text-center my-4 text-primary fw-bold">💸 Expenses Overview</h2>
+
+<div class="container">
+  <div class="row justify-content-center g-4">
+    <!-- Pie Chart Card -->
+    <div class="col-md-6">
+      <div class="card shadow rounded-4 p-4">
+        <h5 class="text-center text-secondary mb-3"></h5>
+        <canvas id="expensePieChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Line Chart Card -->
+    <div class="col-md-6">
+      <div class="card shadow rounded-4 p-4">
+        <h5 class="text-center text-secondary mb-3"></h5>
+        <div class="card-body" style="height: 400px;">
+          <canvas id="expenseLineChart" class="w-100 h-100"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const pieCtx = document.getElementById('expensePieChart');
+  const lineCtx = document.getElementById('expenseLineChart');
+
+  fetch('/Expense/getPieChart')
+    .then(response => response.json())
+    .then(data => {
+      const colors = [
+        '#4e73df', '#1cc88a', '#36b9cc',
+        '#f6c23e', '#e74a3b', '#858796',
+        '#fd7e14', '#20c997', '#0dcaf0', '#6f42c1'
+      ];
+
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: data.map(item => item.category),
+          datasets: [{
+            label: 'Total Expense by Category',
+            data: data.map(item => item.totalAmount),
+            backgroundColor: colors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#343a40',
+                font: { size: 14 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  const value = tooltipItem.raw;
+                  return `Rs. ${value.toLocaleString()}`;
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: 'Category-wise Expense Distribution',
+              font: { size: 18 },
+              color: '#212529',
+              padding: { bottom: 20 }
+            }
+          }
+        }
+      });
+    });
+
+     fetch('/Expense/getMonthlyChart')
+    .then(res => res.json())
+    .then(data => {
+      if (data.length < 2) {
+        lineCtx.replaceWith("Not enough data for trend");
+        return;
+      }
+
+      new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: data.map(x => x.month),   // ["Jun 2025", "Jul 2025"]
+          datasets: [{
+            label: 'Monthly Expense',
+            data: data.map(x => x.total),   // [5000, 83500]
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointRadius: 4,
+            pointBackgroundColor: '#4e73df',
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+        maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: Math.max(...data.map(x => x.total)) * 1.2,
+              ticks: {
+                callback: value => `Rs. ${value}`
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: context => `Rs. ${context.raw.toLocaleString()}`
+              }
+            },
+            title: {
+              display: true,
+              text: 'Monthly Expense Trend',
+              font: { size: 18 },
+              color: '#212529',
+              padding: { bottom: 20 }
+            }
+          }
+        }
+      });
+    });
+</script>
+

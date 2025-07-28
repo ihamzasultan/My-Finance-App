@@ -1,4 +1,5 @@
 using FinanceApp.Data;
+using FinanceApp.Data.Services;
 using FinanceApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,16 +9,16 @@ namespace FinanceApp.Controllers
     public class ExpenseController : Controller
     {
         // Controller actions go here
-        private readonly FinanceAppContext _context;
-        public ExpenseController(FinanceAppContext context)
+        public readonly IExpenseServices _expenseServices;
+        public ExpenseController(IExpenseServices expenseServices)
         {
-            _context = context;
+            _expenseServices = expenseServices;
         }
 
         public async Task<IActionResult> Index()
         {
             // Logic to retrieve and display expenses
-            var expenses = await _context.Expenses.ToListAsync();
+            var expenses = await _expenseServices.GetAllExpensesAsync();
             return View(expenses);
         }
 
@@ -34,11 +35,25 @@ namespace FinanceApp.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Expenses.Add(expense);
-                await _context.SaveChangesAsync();
+                await _expenseServices.AddExpenseAsync(expense);
                 return RedirectToAction(nameof(Index));
             }
             return View();
+        }
+
+        public IActionResult getPieChart()
+        {
+            var chartData = _expenseServices.GetPieChartData();
+            System.Console.WriteLine("Pie Chart Data: " + Json(chartData));
+            return Json(chartData);
+        }
+
+        [HttpGet]
+        public IActionResult getMonthlyChart()
+        {
+            var monthlyData = _expenseServices.GetMonthlyExpenseData();
+            System.Console.WriteLine("Monthly Data: " + Json(monthlyData));
+            return Json(monthlyData);
         }
     }
 }
